@@ -29,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
     String publicationDate;
     String newsSect;
     /////////////////
+    private  TextView tv;
+
+
     String apilink = "http://content.guardianapis.com/search?q=debates&api-key=test";
     URL url ;
     ///Establish connection
@@ -42,15 +45,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        displayNews();
-
+       // displayNews();
+        new JsonTask().execute(apilink);
+        tv= (TextView)findViewById(R.id.apitext) ;
 
 
     }
 
 
     public void displayNews() {
-
 
 
              //initialise the arraylist object
@@ -69,14 +72,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /////////RUN THE ASYNC TASK
-    private class JsonTask extends AsyncTask<URL,String,String >{
+    private class JsonTask extends AsyncTask<String,String,String >{
 
         @Override
-        protected String doInBackground(URL... urls) {
+        protected String doInBackground(String... params) {
 
             try {
                 ////establish the URL link for the API
-                url = new URL(apilink);
+                url = new URL(params[0]);
                 ////Open a connection to the HTTP SERVER
                 con= (HttpURLConnection) url.openConnection();
                 /////Connect to the Server OPen DIRECTLY
@@ -99,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
                     contentBuffer.append(data);
                 }
 
-
+                return contentBuffer.toString();
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -132,7 +135,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String apiResult) {
             super.onPostExecute(apiResult);
-            Topic = apiResult;
+            //Topic = apiResult;
+            tv.setText(apiResult);
         }
     }
 
