@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private  TextView tv;
 
 
-    String apilink = "GET /articles?include=author HTTP/1.1";
+    String apilink = "https://reqres.in/api/products/3";
     URL url ;
     ///Establish connection
     HttpURLConnection con ;
