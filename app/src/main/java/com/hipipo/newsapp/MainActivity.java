@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -32,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private  TextView tv;
 
 
-    String apilink = "http://content.guardianapis.com/search?q=debates&api-key=test";
+    String apilink = "GET /articles?include=author HTTP/1.1";
     URL url ;
     ///Establish connection
     HttpURLConnection con ;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-       // displayNews();
+        displayNews();
         new JsonTask().execute(apilink);
         tv= (TextView)findViewById(R.id.apitext) ;
 
@@ -100,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
                 while ((data = Api_bufferresponseReader.readLine()) != null){
                     //append the buffer response to data
                     contentBuffer.append(data);
+
                 }
 
                 return contentBuffer.toString();
@@ -136,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String apiResult) {
             super.onPostExecute(apiResult);
             //Topic = apiResult;
+            Log.i("API", "onPostExecute: " + apiResult);
             tv.setText(apiResult);
         }
     }
