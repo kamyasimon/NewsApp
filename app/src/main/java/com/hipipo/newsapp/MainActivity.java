@@ -211,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+    /**
     public void displayNews(String topic,String date, String section) {
 
 
@@ -228,5 +229,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+     */
 
 }
