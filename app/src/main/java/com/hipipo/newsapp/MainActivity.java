@@ -47,13 +47,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-      //  displayNews();
-        new JsonTask().execute(apilink);
-       // tv= (TextView)findViewById(R.id.apitext) ;
+
+       new JsonTask().execute(apilink);
+
 
 
     }
-
 
 
 
@@ -162,7 +161,8 @@ public class MainActivity extends AppCompatActivity {
             Topic = apiResult;
             ///Create a string variable for the buffer returned
             String finalNewsJson = contentBuffer.toString();
-
+                ////Initiate the Array list
+            newsArrayList = new ArrayList<News>();
             ///Access into the JSON object Make sure you create a JsonException in the catch
             JSONObject newsRoot = null;
             try {
@@ -183,15 +183,11 @@ public class MainActivity extends AppCompatActivity {
                     String webTitle = actualNews.getString("webTitle");
                     String time = actualNews.getString("webPublicationDate");
 
-
                     // finalNewsBuffer.append(sectionName + "," + webTitle + ","+ time);
-
-                    newsArrayList = new ArrayList<News>();
-
-                        newsArrayList.add(new News(webTitle, time, sectionName));
+                    News news = new News(webTitle, time, sectionName);
 
 
-
+                    newsArrayList.add(news);
 
                 }
             } catch (JSONException e) {
@@ -212,24 +208,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-    /**
-    public void displayNews(String topic,String date, String section) {
 
 
-        //initialise the arraylist object
-        newsArrayList = new ArrayList<News>();
-        ///add items to the array
-        newsArrayList.add(new News(Topic, "12-13-12", "Brief"));
 
-        //attach the custom newsAdapter
-        newsAdapter = new NewsAdapter(this, newsArrayList);
-
-        newsList = (ListView) findViewById(R.id.newslist);
-
-        newsList.setAdapter(newsAdapter);
-
-
-    }
-     */
 
 }
