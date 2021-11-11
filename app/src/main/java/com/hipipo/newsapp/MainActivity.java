@@ -1,7 +1,13 @@
 package com.hipipo.newsapp;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.AsyncTaskLoader;
+import androidx.loader.content.Loader;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,7 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
     ListView newsList;
     ArrayList newsArrayList;
     NewsAdapter newsAdapter;
@@ -48,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-       new JsonTask().execute(apilink);
+
 
 
 
@@ -57,14 +63,29 @@ public class MainActivity extends AppCompatActivity {
 
 
     /////////RUN THE ASYNC TASK
-    private class JsonTask extends AsyncTask<String,String,String >{
+    private class JsonTask extends AsyncTaskLoader<String> {
+
+        public JsonTask(@NonNull Context context) {
+            super(context);
+
+        }
 
         @Override
-        protected String doInBackground(String... params) {
+        protected void onStartLoading() {
+            forceLoad();
+        }
+
+
+
+
+
+
+        @Override
+        public String loadInBackground() {
 
             try {
                 ////establish the URL link for the API
-                url = new URL(params[0]);
+                url = new URL(apilink);
                 ////Open a connection to the HTTP SERVER
                 con= (HttpURLConnection) url.openConnection();
                 /////Connect to the Server OPen DIRECTLY
@@ -101,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONArray newsResults = newsResponse.getJSONArray("results");
 
                 //create another string buffer to APPEND the Json Results
-               //>>>>> StringBuffer finalNewsBuffer = new StringBuffer();
+                //>>>>> StringBuffer finalNewsBuffer = new StringBuffer();
 
                 //Access the multiple ojects next, start TEST a single object[0]
                 for(int i=0;i < newsResults.length();i++){
@@ -118,8 +139,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
 
-               //Return the buffer to be accessed by the PostExecute.
-               return contentBuffer.toString();
+                //Return the buffer to be accessed by the PostExecute.
+                return contentBuffer.toString();
 
 
 
@@ -154,61 +175,68 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
-        @Override
-        protected void onPostExecute(String apiResult) {
-            super.onPostExecute(apiResult);
+    }
 
-            Topic = apiResult;
-            ///Create a string variable for the buffer returned
-            String finalNewsJson = contentBuffer.toString();
-                ////Initiate the Array list
-            newsArrayList = new ArrayList<News>();
-            ///Access into the JSON object Make sure you create a JsonException in the catch
-            JSONObject newsRoot = null;
-            try {
-                newsRoot = new JSONObject(finalNewsJson);
-                //Acces JsonObject of reponse
-                JSONObject newsResponse = newsRoot.getJSONObject("response");
+    @Override
+    public Loader<String> onCreateLoader(int id, Bundle args) {
+        return null;
+    }
 
-                //Acces JsonArray of results
-                JSONArray newsResults = newsResponse.getJSONArray("results");
+    @Override
+    public void onLoadFinished(@NonNull Loader<String> loader, String data) {
 
 
-                //Access the multiple ojects next, start TEST a single object[0]
-                for(int i=0;i < newsResults.length();i++) {
-                    JSONObject actualNews = newsResults.getJSONObject(i);
+        ///Create a string variable for the buffer returned
+        String finalNewsJson = contentBuffer.toString();
+        ////Initiate the Array list
+        newsArrayList = new ArrayList<News>();
+        ///Access into the JSON object Make sure you create a JsonException in the catch
+        JSONObject newsRoot = null;
+        try {
+            newsRoot = new JSONObject(finalNewsJson);
+            //Acces JsonObject of reponse
+            JSONObject newsResponse = newsRoot.getJSONObject("response");
 
-                    //Access the actualNews Keys, begining with sectionName
-                    String sectionName = actualNews.getString("sectionName");
-                    String webTitle = actualNews.getString("webTitle");
-                    String time = actualNews.getString("webPublicationDate");
-
-                    // finalNewsBuffer.append(sectionName + "," + webTitle + ","+ time);
-                    News news = new News(webTitle, time, sectionName);
+            //Acces JsonArray of results
+            JSONArray newsResults = newsResponse.getJSONArray("results");
 
 
-                    newsArrayList.add(news);
+            //Access the multiple ojects next, start TEST a single object[0]
+            for(int i=0;i < newsResults.length();i++) {
+                JSONObject actualNews = newsResults.getJSONObject(i);
 
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+                //Access the actualNews Keys, begining with sectionName
+                String sectionName = actualNews.getString("sectionName");
+                String webTitle = actualNews.getString("webTitle");
+                String time = actualNews.getString("webPublicationDate");
+
+                // finalNewsBuffer.append(sectionName + "," + webTitle + ","+ time);
+                News news = new News(webTitle, time, sectionName);
+
+
+                newsArrayList.add(news);
+
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
 
 //attach the custom newsAdapter
-            newsAdapter = new NewsAdapter(MainActivity.this, newsArrayList);
+        newsAdapter = new NewsAdapter(MainActivity.this, newsArrayList);
 
-            newsList = (ListView) findViewById(R.id.newslist);
+        newsList = (ListView) findViewById(R.id.newslist);
 
-            newsList.setAdapter(newsAdapter);
-            Log.i("API", "onPostExecute: " + apiResult);
-            //tv.setText(apiResult);
-            //initialise the arraylist object
-
-        }
-
+        newsList.setAdapter(newsAdapter);
+        //Log.i("API", "onPostExecute: " + apiResult);
+        //tv.setText(apiResult);
+        //initialise the arraylist object
     }
 
+    @Override
+    public void onLoaderReset(@NonNull Loader<String> loader) {
+
+    }
 
 
 
