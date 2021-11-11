@@ -33,7 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private  TextView tv;
 
 
-    String apilink = "https://reqres.in/api/products/3";
+    //String apilink = "https://reqres.in/api/products/3";
+    String apilink = "https://content.guardianapis.com/search?q=debate&tag=politics/politics&from-date=2014-01-01&api-key=test";
     URL url ;
     ///Establish connection
     HttpURLConnection con ;
@@ -46,31 +47,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        displayNews();
+      //  displayNews();
         new JsonTask().execute(apilink);
-        tv= (TextView)findViewById(R.id.apitext) ;
+       // tv= (TextView)findViewById(R.id.apitext) ;
 
 
     }
 
 
-    public void displayNews() {
 
-
-             //initialise the arraylist object
-        newsArrayList = new ArrayList<News>();
-        ///add items to the array
-        newsArrayList.add(new News(Topic, "12-13-12", "Brief"));
-
-        //attach the custom newsAdapter
-        newsAdapter = new NewsAdapter(this, newsArrayList);
-
-        newsList = (ListView) findViewById(R.id.newslist);
-
-        newsList.setAdapter(newsAdapter);
-
-
-    }
 
     /////////RUN THE ASYNC TASK
     private class JsonTask extends AsyncTask<String,String,String >{
@@ -104,14 +89,50 @@ public class MainActivity extends AppCompatActivity {
 
                 }
 
-                return contentBuffer.toString();
+                ///Create a string variable for the buffer returned
+                String finalNewsJson = contentBuffer.toString();
+
+                ///Access into the JSON object Make sure you create a JsonException in the catch
+                JSONObject newsRoot = new JSONObject(finalNewsJson);
+
+                //Acces JsonObject of reponse
+                JSONObject newsResponse = newsRoot.getJSONObject("response");
+
+                //Acces JsonArray of results
+                JSONArray newsResults = newsResponse.getJSONArray("results");
+
+                //create another string buffer to APPEND the Json Results
+               //>>>>> StringBuffer finalNewsBuffer = new StringBuffer();
+
+                //Access the multiple ojects next, start TEST a single object[0]
+                for(int i=0;i < newsResults.length();i++){
+                    JSONObject actualNews = newsResults.getJSONObject(i);
+
+                    //Access the actualNews Keys, begining with sectionName
+                    String sectionName = actualNews.getString("sectionName");
+                    String webTitle = actualNews.getString("webTitle");
+                    String time = actualNews.getString("webPublicationDate");
+
+
+
+                    // finalNewsBuffer.append(sectionName + "," + webTitle + ","+ time);
+                }
+
+
+               //Return the buffer to be accessed by the PostExecute.
+               return contentBuffer.toString();
+
+
+
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             ////close the connections
-            finally {
+            catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
                 //check if the connection is open
                 if(con != null){
                     ///close the connection
@@ -137,11 +158,75 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String apiResult) {
             super.onPostExecute(apiResult);
-            //Topic = apiResult;
-            Log.i("API", "onPostExecute: " + apiResult);
-            tv.setText(apiResult);
-        }
-    }
 
+            Topic = apiResult;
+            ///Create a string variable for the buffer returned
+            String finalNewsJson = contentBuffer.toString();
+
+            ///Access into the JSON object Make sure you create a JsonException in the catch
+            JSONObject newsRoot = null;
+            try {
+                newsRoot = new JSONObject(finalNewsJson);
+                //Acces JsonObject of reponse
+                JSONObject newsResponse = newsRoot.getJSONObject("response");
+
+                //Acces JsonArray of results
+                JSONArray newsResults = newsResponse.getJSONArray("results");
+
+
+                //Access the multiple ojects next, start TEST a single object[0]
+                for(int i=0;i < newsResults.length();i++) {
+                    JSONObject actualNews = newsResults.getJSONObject(i);
+
+                    //Access the actualNews Keys, begining with sectionName
+                    String sectionName = actualNews.getString("sectionName");
+                    String webTitle = actualNews.getString("webTitle");
+                    String time = actualNews.getString("webPublicationDate");
+
+
+                    // finalNewsBuffer.append(sectionName + "," + webTitle + ","+ time);
+
+                    newsArrayList = new ArrayList<News>();
+                    ///add items to the array
+                    newsArrayList.add(new News(webTitle,time, sectionName));
+
+
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+//attach the custom newsAdapter
+            newsAdapter = new NewsAdapter(MainActivity.this, newsArrayList);
+
+            newsList = (ListView) findViewById(R.id.newslist);
+
+            newsList.setAdapter(newsAdapter);
+            Log.i("API", "onPostExecute: " + apiResult);
+            //tv.setText(apiResult);
+            //initialise the arraylist object
+
+        }
+
+    }
+    public void displayNews(String topic,String date, String section) {
+
+
+        //initialise the arraylist object
+        newsArrayList = new ArrayList<News>();
+        ///add items to the array
+        newsArrayList.add(new News(Topic, "12-13-12", "Brief"));
+
+        //attach the custom newsAdapter
+        newsAdapter = new NewsAdapter(this, newsArrayList);
+
+        newsList = (ListView) findViewById(R.id.newslist);
+
+        newsList.setAdapter(newsAdapter);
+
+
+    }
 
 }
