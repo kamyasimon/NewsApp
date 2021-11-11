@@ -188,7 +188,9 @@ public class MainActivity extends AppCompatActivity {
 
                     newsArrayList = new ArrayList<News>();
                     ///add items to the array
-                    newsArrayList.add(new News(webTitle,time, sectionName));
+                    for(int x =0; x < newsResults.length();x++) {
+                        newsArrayList.add(new News(webTitle, time, sectionName));
+                    }
 
 
 

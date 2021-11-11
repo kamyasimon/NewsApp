@@ -158,7 +158,7 @@ public class NewsApi extends AsyncTask<String,String,String >{
             }
 
             MainActivity mainActivity = new MainActivity();
-            mainActivity.displayNews(sectionName,webTitle,time);
+           // mainActivity.displayNews(sectionName,webTitle,time);
 
             finalNewsBuffer.append(sectionName + "," + webTitle + ","+ time);
         }
